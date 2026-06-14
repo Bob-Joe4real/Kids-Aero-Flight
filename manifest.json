@@ -1,0 +1,23 @@
+{
+  "name": "Aero Flight: DEWISE AVIATOR",
+  "short_name": "AeroFlight",
+  "description": "Soar past storm fronts in this aerodynamic offline flight simulator.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070b19",
+  "theme_color": "#070b19",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
