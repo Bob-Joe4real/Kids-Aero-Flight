@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aero Flight: DEWISE AVIATOR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Rajdhani', sans-serif;
+  background: #05070f;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* SPLASH SCREEN (ANIMATED NEON THUNDERSTORM) */
+#menuScreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, #0c152b 0%, #050811 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  z-index: 1000;
+  text-align: center;
+  overflow: hidden;
+  transition: opacity 0.5s ease;
+}
+
+.splash-cloud {
+  position: absolute;
+  background: rgba(0, 180, 216, 0.05);
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: drift 25s infinite linear;
+  pointer-events: none;
+}
+#cloud1 { width: 500px; height: 350px; top: 10%; left: -200px; }
+#cloud2 { width: 600px; height: 400px; bottom: 15%; right: -250px; animation-duration: 35s; }
+
+@keyframes drift {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(110vw, 50px); }
+  100% { transform: translate(-50vw, 0); }
+}
+
+#lightningFlash {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1001;
+}
+
+/* ANIMATED GAME TITLE */
+.title-container {
+  margin-bottom: 40px;
+  z-index: 1002;
+}
+
+.title-main {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 4rem;
+  font-weight: 900;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  background: linear-gradient(45deg, #00f2ff, #ffffff, #0077b6, #00f2ff);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s linear infinite, floatText 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 15px rgba(0, 242, 255, 0.3));
+}
+
+.title-sub {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 12px;
+  color: #00b4d8;
+  font-weight: 700;
+  margin-top: 12px;
+  text-indent: 12px;
+  animation: pulseGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes shine {
+  to { background-position: 200% center; }
+}
+@keyframes floatText {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pulseGlow {
+  0% { opacity: 0.6; text-shadow: 0 0 5px rgba(0,242,255,0.2); }
+  100% { opacity: 1; text-shadow: 0 0 20px rgba(0,242,255,0.8); }
+}
+
+/* HUD GLASSMORPHISM METERS */
+.hud {
+  position: absolute;
+  top: 25px;
+  color: #ffffff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  background: rgba(10, 15, 30, 0.6);
+  border: 1px solid rgba(0, 242, 255, 0.25);
+  padding: 12px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  z-index: 10;
+  letter-spacing: 1px;
+}
+#speedDisplay { left: 25px; border-left: 4px solid #00f2ff; }
+#scoreDisplay { right: 25px; border-right: 4px solid #00f2ff; }
+.hud span { color: #00f2ff; font-weight: 700; }
+
+/* RETICLE AIM CROSSHAIR */
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 2px dashed rgba(0, 242, 255, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+#crosshair::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 6px; height: 6px;
+  background: #00f2ff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px #00f2ff;
+}
+
+/* STEERING INTERFACES */
+.controls {
+  position: absolute;
+  bottom: 45px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 140px;
+  z-index: 20;
+}
+
+.btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 242, 255, 0.4);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  background: rgba(10, 18, 36, 0.6);
+  color: #00f2ff;
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.15);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+  touch-action: none;
+}
+.btn:active { 
+  background: rgba(0, 242, 255, 0.3); 
+  border-color: #00f2ff; 
+  transform: scale(0.92);
+  box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);
+}
+
+.edge {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 20%;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 242, 255, 0.05);
+  font-size: 2rem;
+  font-weight: 900;
+  transition: background 0.3s;
+}
+#leftEdge { left: 0; border-right: 1px dashed rgba(255,255,255,0.03); }
+#rightEdge { right: 0; border-left: 1px dashed rgba(255,255,255,0.03); }
+
+/* GAME OVER PANEL */
+#gameOverScreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(4, 6, 14, 0.95);
+  backdrop-filter: blur(12px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  z-index: 999;
+}
+#gameOverScreen h1 { 
+  font-family: 'Orbitron', sans-serif; 
+  font-size: 3.8rem; 
+  color: #ff3333; 
+  margin-bottom: 10px;
+  letter-spacing: 3px;
+  text-shadow: 0 0 20px rgba(255,51,51,0.4);
+}
+
+button.action-btn {
+  font-family: 'Orbitron', sans-serif;
+  padding: 18px 55px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #05070f;
+  background: linear-gradient(45deg, #00f2ff, #0077b6);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 5px 25px rgba(0,242,255,0.4);
+  transition: all 0.3s ease;
+}
+button.action-btn:hover { 
+  transform: translateY(-3px); 
+  box-shadow: 0 8px 35px rgba(0,242,255,0.6);
+  filter: brightness(1.2);
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<div id="lightningFlash"></div>
+<div id="crosshair"></div>
+
+<div id="menuScreen">
+  <div class="splash-cloud" id="cloud1"></div>
+  <div class="splash-cloud" id="cloud2"></div>
+  
+  <div class="title-container">
+    <div class="title-main">Aero Flight</div>
+    <div class="title-sub">DEWISE AVIATOR</div>
+  </div>
+  <button class="action-btn" onclick="startGame()">TAKE OFF</button>
+</div>
+
+<div id="speedDisplay" class="hud">SPEED: <span id="speed">0</span> KNTS</div>
+<div id="scoreDisplay" class="hud">SCORE: <span id="score">0</span> | HIGH: <span id="highScore">0</span></div>
+
+<div id="leftEdge" class="edge">BRAKE</div>
+<div id="rightEdge" class="edge">BOOST</div>
+
+<div class="controls">
+  <button class="btn" id="leftBtn">◀ LEFT</button>
+  <button class="btn" id="rightBtn">RIGHT ▶</button>
+</div>
+
+<div id="gameOverScreen">
+  <h1>MAYDAY!</h1>
+  <p style="font-size: 1.4rem; margin-bottom: 30px; color: #a0aec0; letter-spacing: 1px;">Aircraft lost in heavy turbulence system.</p>
+  <button class="action-btn" onclick="restartGame()">RE-DEPLOY</button>
+</div>
+<script>
+let scene, camera, renderer;
+let aircraft, jetFire;
+let obstacles = [];
+let ambientClouds = [];
+let particleSystem;
+let gameRunning = false;
+
+let speed = 0.6;
+let score = 0;
+let maxSpeed = 3.0;
+let targetX = 0;
+
+let braking = false;
+let accelerating = false;
+let steeringLeft = false;
+let steeringRight = false;
+
+let audioCtx = null;
+let splashSource = null;
+let gameMusicSource = null;
+let jetEngineOsc = null;
+let jetEngineGain = null;
+
+const trackSampleRate = 22050;
+let obstacleTimer = 0;
+
+let highScore = Number(localStorage.getItem("flightHighScore")) || 0;
+document.getElementById("highScore").innerText = highScore;
+
+function initAudioSystem() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  playSplashTheme();
+}
+
+function playSplashTheme() {
+  const duration = 5.0;
+  const bufferSize = trackSampleRate * duration;
+  const buffer = audioCtx.createBuffer(2, bufferSize, trackSampleRate);
+  const left = buffer.getChannelData(0);
+  const right = buffer.getChannelData(1);
+
+  for (let i = 0; i < bufferSize; i++) {
+    let t = i / trackSampleRate;
+    let seq = [220.0, 261.63, 196.0, 164.81]; 
+    let step = Math.floor(t / 1.25) % 4;
+    let base = seq[step];
+
+    let vocalPad = Math.sin(2 * Math.PI * base * t) * 0.22 + Math.sin(2 * Math.PI * (base * 1.2) * t) * 0.12;
+    vocalPad += Math.sin(2 * Math.PI * (base * 2) * (t + 0.02 * Math.sin(2 * Math.PI * 6 * t))) * 0.08;
+
+    let signal = vocalPad * (1.0 - (t * 0.2 % 1) * 0.3);
+
+    left[i] = signal * 0.75;
+    right[i] = signal * 0.75;
+  }
+
+  splashSource = audioCtx.createBufferSource();
+  splashSource.buffer = buffer;
+  splashSource.loop = true;
+  
+  let splashGain = audioCtx.createGain();
+  splashGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+  splashSource.connect(splashGain);
+  splashGain.connect(audioCtx.destination);
+  
+  splashSource.start();
+}
+
+function playGameplayTheme() {
+  if (gameMusicSource) return;
+
+  const duration = 6.0;
+  const bufferSize = trackSampleRate * duration;
+  const buffer = audioCtx.createBuffer(2, bufferSize, trackSampleRate);
+  const left = buffer.getChannelData(0);
+  const right = buffer.getChannelData(1);
+
+  for (let i = 0; i < bufferSize; i++) {
+    let t = i / trackSampleRate;
+    let chordProg = [110.0, 87.31, 130.81, 98.0];
+    let chordIdx = Math.floor(t / 1.5) % 4;
+    let baseFreq = chordProg[chordIdx];
+
+    let pad = Math.sin(2 * Math.PI * baseFreq * t) * 0.22;
+    let arpStep = Math.floor(t * 8) % 4;
+    let arpFreq = baseFreq * 4 * [1.0, 1.2, 1.5, 1.8][arpStep];
+    let arp = Math.sin(2 * Math.PI * arpFreq * t) * 0.08 * (1.0 - (t * 8 % 1));
+
+    let drumCycle = t * 2 % 1;
+    let kick = Math.sin(2 * Math.PI * 150 * Math.exp(-35 * drumCycle)) * 0.45 * Math.exp(-6 * drumCycle);
+
+    let mix = pad + arp + kick;
+    left[i] = mix * 0.8;
+    right[i] = mix * 0.8;
+  }
+
+  gameMusicSource = audioCtx.createBufferSource();
+  gameMusicSource.buffer = buffer;
+  gameMusicSource.loop = true;
+
+  let gameVolume = audioCtx.createGain();
+  gameVolume.gain.setValueAtTime(0.35, audioCtx.currentTime);
+  gameMusicSource.connect(gameVolume);
+  gameVolume.connect(audioCtx.destination);
+  
+  gameMusicSource.start();
+}
+
+function stopSplashTheme() {
+  if (splashSource) {
+    try { splashSource.stop(); } catch(e){}
+    splashSource.disconnect();
+    splashSource = null;
+  }
+}
+
+function stopGameplayTheme() {
+  if (gameMusicSource) {
+    try { gameMusicSource.stop(); } catch(e){}
+    gameMusicSource.disconnect();
+    gameMusicSource = null;
+  }
+}
+
+function startInFlightThrusters() {
+  if (jetEngineOsc) return;
+  
+  jetEngineOsc = audioCtx.createOscillator();
+  jetEngineGain = audioCtx.createGain();
+  
+  jetEngineOsc.type = 'sawtooth';
+  jetEngineOsc.frequency.setValueAtTime(45, audioCtx.currentTime);
+  
+  let lowpassFilter = audioCtx.createBiquadFilter();
+  lowpassFilter.type = 'lowpass';
+  lowpassFilter.frequency.setValueAtTime(110, audioCtx.currentTime);
+
+  jetEngineGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+  
+  jetEngineOsc.connect(lowpassFilter);
+  lowpassFilter.connect(jetEngineGain);
+  jetEngineGain.connect(audioCtx.destination);
+  
+  jetEngineOsc.start();
+}
+
+function updateEnginePitch() {
+  if (jetEngineOsc) {
+    jetEngineOsc.frequency.setValueAtTime(42 + (speed * 50), audioCtx.currentTime);
+  }
+}
+
+function stopInFlightThrusters() {
+  if (jetEngineOsc) {
+    try { jetEngineOsc.stop(); } catch(e){}
+    jetEngineOsc.disconnect();
+    jetEngineOsc = null;
+  }
+}
+
+function triggerCrashExplosion() {
+  if (!audioCtx) return;
+  
+  let explosionDuration = audioCtx.sampleRate * 0.6;
+  let noiseBuffer = audioCtx.createBuffer(1, explosionDuration, audioCtx.sampleRate);
+  let channelData = noiseBuffer.getChannelData(0);
+  
+  for (let i = 0; i < explosionDuration; i++) {
+    channelData[i] = Math.random() * 2 - 1;
+  }
+  
+  let sourceNode = audioCtx.createBufferSource();
+  sourceNode.buffer = noiseBuffer;
+  
+  let lowpassFilter = audioCtx.createBiquadFilter();
+  lowpassFilter.type = 'lowpass';
+  lowpassFilter.frequency.setValueAtTime(260, audioCtx.currentTime);
+  lowpassFilter.frequency.exponentialRampToValueAtTime(15, audioCtx.currentTime + 0.6);
+  
+  let gainEnvelope = audioCtx.createGain();
+  gainEnvelope.gain.setValueAtTime(0.55, audioCtx.currentTime);
+  gainEnvelope.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+  
+  sourceNode.connect(lowpassFilter);
+  lowpassFilter.connect(gainEnvelope);
+  gainEnvelope.connect(audioCtx.destination);
+  
+  sourceNode.start();
+}
+
+function runLightningLoop() {
+  if (gameRunning) return;
+  
+  setTimeout(() => {
+    if (!gameRunning) {
+      let flash = document.getElementById("lightningFlash");
+      flash.style.opacity = "0.4";
+      setTimeout(() => { flash.style.opacity = "0"; }, 50);
+      setTimeout(() => { flash.style.opacity = "0.2"; }, 110);
+      setTimeout(() => { flash.style.opacity = "0"; }, 200);
+    }
+    runLightningLoop();
+  }, 3000 + Math.random() * 4000);
+}
+
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x070b19); 
+  scene.fog = new THREE.FogExp2(0x070b19, 0.012);
+
+  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambientLight);
+
+  const sunLight = new THREE.DirectionalLight(0x00f2ff, 1.2);
+  sunLight.position.set(5, 15, 10);
+  scene.add(sunLight);
+
+  // PRETTIER AIRCRAFT DESIGN
+  aircraft = new THREE.Group();
+  const bodyGeo = new THREE.CylinderGeometry(0.16, 0.1, 2.2, 10);
+  bodyGeo.rotateX(Math.PI / 2);
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.8, roughness: 0.2 });
+  const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+  aircraft.add(bodyMesh);
+
+  // Wings
+  const wingGeo = new THREE.BoxGeometry(1.8, 0.03, 0.4); 
+  const wingMat = new THREE.MeshStandardMaterial({ color: 0x0c1a30, metalness: 0.5, roughness: 0.4 });
+  const wingMesh = new THREE.Mesh(wingGeo, wingMat);
+  wingMesh.position.set(0, -0.02, 0.1);
+  aircraft.add(wingMesh);
+
+  // Wing Tip Lights
+  const lightGeo = new THREE.SphereGeometry(0.04, 4, 4);
+  const redMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  const greenMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  const leftLight = new THREE.Mesh(lightGeo, redMat);
+  leftLight.position.set(-0.9, 0, 0.1);
+  const rightLight = new THREE.Mesh(lightGeo, greenMat);
+  rightLight.position.set(0.9, 0, 0.1);
+  aircraft.add(leftLight, rightLight);
+
+  // Tail Fin
+  const tailGeo = new THREE.BoxGeometry(0.03, 0.55, 0.35);
+  const tailMesh = new THREE.Mesh(tailGeo, wingMat);
+  tailMesh.position.set(0, 0.28, -0.8);
+  aircraft.add(tailMesh);
+
+  // Jet Flame Thruster
+  const fireGeo = new THREE.ConeGeometry(0.12, 0.6, 8);
+  fireGeo.rotateX(Math.PI / -2);
+  const fireMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.8 });
+  jetFire = new THREE.Mesh(fireGeo, fireMat);
+  jetFire.position.set(0, 0, -1.3);
+  aircraft.add(jetFire);
+
+  aircraft.position.set(0, 0, 0);
+  scene.add(aircraft);
+
+  camera.position.set(0, 1.6, 5.5);
+
+  // Environment Systems
+  generateInitialSkyEnvironment();
+  buildStarfield();
+
+  window.addEventListener("resize", onResize);
+  setupInputListeners();
+  runLightningLoop();
+  
+  document.addEventListener('pointerdown', initAudioSystem, { once: true });
+  document.addEventListener('touchstart', initAudioSystem, { once: true });
+  
+  animate();
+}
+
+function buildStarfield() {
+  const particleCount = 180;
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount * 3);
+
+  for (let i = 0; i < particleCount * 3; i += 3) {
+    positions[i] = (Math.random() - 0.5) * 40;
+    positions[i + 1] = (Math.random() - 0.5) * 30;
+    positions[i + 2] = Math.random() * -300;
+  }
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const material = new THREE.PointsMaterial({ color: 0x00f2ff, size: 0.25, transparent: true, opacity: 0.6 });
+  particleSystem = new THREE.Points(geometry, material);
+  scene.add(particleSystem);
+}
+
+function generateInitialSkyEnvironment() {
+  for (let i = 0; i < 20; i++) {
+    createSkyCloud(Math.random() * -200);
+  }
+}
+
+function createSkyCloud(zPos) {
+  const cloudGroup = new THREE.Group();
+  const cloudMat = new THREE.MeshStandardMaterial({ color: 0x182440, roughness: 0.9, transparent: true, opacity: 0.4 });
+  
+  const segments = 3 + Math.floor(Math.random() * 3);
+  for(let i=0; i<segments; i++) {
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(2.0 + Math.random()*3, 6, 6), cloudMat);
+    sphere.position.set((Math.random()-0.5)*4, (Math.random()-0.5)*1.5, (Math.random()-0.5)*4);
+    cloudGroup.add(sphere);
+  }
+  
+  cloudGroup.position.x = (Math.random() - 0.5) > 0 ? (15 + Math.random() * 20) : (-15 - Math.random() * 20);
+  cloudGroup.position.y = -6 - Math.random() * 6;
+  cloudGroup.position.z = zPos;
+  
+  scene.add(cloudGroup);
+  ambientClouds.push(cloudGroup);
+}
+
+function startGame() {
+  initAudioSystem();
+  stopSplashTheme();
+  playGameplayTheme();
+  document.getElementById("menuScreen").style.opacity = "0";
+  setTimeout(() => {
+    document.getElementById("menuScreen").style.display = "none";
+  }, 500);
+  gameRunning = true;
+  startInFlightThrusters();
+}
+
+function spawnObstacle() {
+  if (!gameRunning) return;
+
+  const cloudGroup = new THREE.Group();
+  // Cyan glowing cyberpunk storm nodes
+  const cloudMat = new THREE.MeshStandardMaterial({ 
+    color: 0x0b2545, 
+    emissive: 0x00b4d8,
+    emissiveIntensity: 0.15,
+    roughness: 0.8 
+  });
+
+  const numSpheres = 4 + Math.floor(Math.random() * 3);
+  for(let i = 0; i < numSpheres; i++) {
+    const radius = 0.6 + Math.random() * 0.8;
+    const sphereMesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 8), cloudMat);
+    sphereMesh.position.set(
+      (Math.random() - 0.5) * 1.5,
+      (Math.random() - 0.5) * 0.6,
+      (Math.random() - 0.5) * 1.5
+    );
+    cloudGroup.add(sphereMesh);
+  }
+
+  const lanes = [-3.6, -1.8, 0, 1.8, 3.6];
+  cloudGroup.position.x = lanes[Math.floor(Math.random() * lanes.length)];
+  cloudGroup.position.y = (Math.random() - 0.5) * 0.3;
+  cloudGroup.position.z = aircraft.position.z - 80;
+
+  scene.add(cloudGroup);
+  obstacles.push(cloudGroup);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  if (gameRunning) {
+    // Speed modifiers
+    if (braking) speed -= 0.03;
+    if (accelerating) speed += 0.03;
+    speed = Math.max(0.5, Math.min(speed, maxSpeed));
+
+    updateEnginePitch();
+    
+    // Scale thruster visual size with speed mechanics
+    jetFire.scale.set(1, 1, speed * 1.2);
+
+    if (steeringLeft) targetX -= 0.16;
+    if (steeringRight) targetX += 0.16;
+    targetX = Math.max(-4.2, Math.min(targetX, 4.2));
+
+    aircraft.position.x += (targetX - aircraft.position.x) * 0.18;
+    aircraft.rotation.z = (aircraft.position.x - targetX) * 0.25;
+    aircraft.rotation.y = (targetX - aircraft.position.x) * 0.15;
+
+    aircraft.position.z -= speed;
+
+    score = Math.floor(Math.abs(aircraft.position.z));
+    document.getElementById("speed").innerText = Math.floor(speed * 140);
+    document.getElementById("score").innerText = score;
+
+    camera.position.z = aircraft.position.z + 5.5;
+    camera.position.x = aircraft.position.x * 0.7;
+    camera.lookAt(new THREE.Vector3(aircraft.position.x, aircraft.position.y + 0.2, aircraft.position.z - 4));
+
+    // Continuous Procedural Obstacle Spawning
+    obstacleTimer += speed;
+    if (obstacleTimer > 25) {
+      spawnObstacle();
+      obstacleTimer = 0;
+    }
+
+    manageObstacles();
+    manageAmbientSky();
+ // Loop particle fields forward
+    if(particleSystem) {
+      particleSystem.position.z = aircraft.position.z;
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+
+function manageAmbientSky() {
+  for (let i = ambientClouds.length - 1; i >= 0; i--) {
+    let cloud = ambientClouds[i];
+    if (cloud.position.z > camera.position.z + 15) {
+      cloud.position.z = aircraft.position.z - 200;
+      cloud.position.x = (Math.random() - 0.5) > 0 ? (15 + Math.random() * 20) : (-15 - Math.random() * 20);
+    }
+  }
+}
+
+function manageObstacles() {
+  const planeBox = new THREE.Box3().setFromObject(aircraft);
+
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    let obs = obstacles[i];
+
+    if (obs.position.z > camera.position.z + 5) {
+      scene.remove(obs);
+      obstacles.splice(i, 1);
+      continue;
+    }
+
+    const obsBox = new THREE.Box3().setFromObject(obs);
+    if (planeBox.intersectsBox(obsBox)) {
+      gameOver();
+    }
+  }
+}
+
+function gameOver() {
+  gameRunning = false;
+  stopInFlightThrusters();
+  stopGameplayTheme();
+  triggerCrashExplosion();
+  
+  steeringLeft = false;
+  steeringRight = false;
+  accelerating = false;
+  braking = false;
+  
+  document.getElementById("gameOverScreen").style.display = "flex";
+
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem("flightHighScore", highScore);
+    document.getElementById("highScore").innerText = highScore;
+  }
+}
+
+function restartGame() {
+  // Reset all loops and elements safely
+  for(let i=0; i<obstacles.length; i++) {
+    scene.remove(obstacles[i]);
+  }
+  obstacles = [];
+  
+  aircraft.position.set(0, 0, 0);
+  targetX = 0;
+  speed = 0.6;
+  score = 0;
+  obstacleTimer = 0;
+  
+  document.getElementById("gameOverScreen").style.display = "none";
+  playGameplayTheme();
+  startInFlightThrusters();
+  gameRunning = true;
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function setupInputListeners() {
+  const lBtn = document.getElementById("leftBtn");
+  const rBtn = document.getElementById("rightBtn");
+
+  // --- MOBILE FLIGHT TOUCH INTERFACES ---
+  lBtn.addEventListener("touchstart", (e) => { e.preventDefault(); steeringLeft = true; }, { passive: false });
+  lBtn.addEventListener("touchend", (e) => { e.preventDefault(); steeringLeft = false; }, { passive: false });
+  lBtn.addEventListener("touchcancel", (e) => { e.preventDefault(); steeringLeft = false; }, { passive: false });
+
+  rBtn.addEventListener("touchstart", (e) => { e.preventDefault(); steeringRight = true; }, { passive: false });
+  rBtn.addEventListener("touchend", (e) => { e.preventDefault(); steeringRight = false; }, { passive: false });
+  rBtn.addEventListener("touchcancel", (e) => { e.preventDefault(); steeringRight = false; }, { passive: false });
+
+  // --- MOUSE CLICK MANUAL OVERRIDES ---
+  lBtn.addEventListener("mousedown", (e) => { e.preventDefault(); steeringLeft = true; });
+  rBtn.addEventListener("mousedown", (e) => { e.preventDefault(); steeringRight = true; });
+
+  window.addEventListener("mouseup", () => {
+    steeringLeft = false;
+    steeringRight = false;
+    braking = false;
+    accelerating = false;
+  });
+
+  // --- SCREEN EDGE ACCELERATION SYSTEM ---
+  const lEdge = document.getElementById("leftEdge");
+  const rEdge = document.getElementById("rightEdge");
+
+  lEdge.addEventListener("touchstart", (e) => { e.preventDefault(); braking = true; }, { passive: false });
+  lEdge.addEventListener("touchend", (e) => { e.preventDefault(); braking = false; }, { passive: false });
+  lEdge.addEventListener("mousedown", (e) => { e.preventDefault(); braking = true; });
+
+  rEdge.addEventListener("touchstart", (e) => { e.preventDefault(); accelerating = true; }, { passive: false });
+  rEdge.addEventListener("touchend", (e) => { e.preventDefault(); accelerating = false; }, { passive: false });
+  rEdge.addEventListener("mousedown", (e) => { e.preventDefault(); accelerating = true; });
+
+  // --- DESKTOP KEYBOARD CONTROLS SYSTEM ---
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") steeringLeft = true;
+    if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") steeringRight = true;
+    if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") accelerating = true;
+    if (e.key === "ArrowDown" || e.key.toLowerCase() === "s" || e.key === " ") braking = true;
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") steeringLeft = false;
+    if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") steeringRight = false;
+    if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") accelerating = false;
+    if (e.key === "ArrowDown" || e.key.toLowerCase() === "s" || e.key === " ") braking = false;
+  });
+}
+
+// Initial Core Run Hook
+window.onload = () => {
+  init();
+};
+</script>
+</body>
+</html>
